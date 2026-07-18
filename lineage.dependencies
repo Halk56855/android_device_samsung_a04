@@ -1,0 +1,17 @@
+[
+  {
+    "repository": "A04-Trees-and-ROMs/android_vendor_samsung_a04",
+    "target_path": "vendor/samsung/a04",
+    "branch": "lineage-22.2"
+  },
+  {
+    "repository": "A04-Trees-and-ROMs/android_kernel_samsung_a04",
+    "target_path": "kernel/samsung/a04",
+    "branch": "lineage-22.2"
+  },
+  {
+    "repository": "LineageOS/android_hardware_mediatek",
+    "target_path": "hardware/mediatek",
+    "branch": "lineage-22.2"
+  }
+]
