@@ -1,0 +1,74 @@
+name: Build Unofficial LineageOS for Galaxy A04
+
+on:
+  workflow_dispatch:
+    inputs:
+      ANDROID_VERSION:
+        description: 'Android/LineageOS Branch Version (e.g., 23.2 for Android 16)'
+        required: true
+        default: '23.2'
+        type: string
+      DEVICE_CODENAME:
+        description: 'Device Codename (e.g., a04)'
+        required: true
+        default: 'a04'
+        type: string
+
+jobs:
+  build:
+      runs-on: ubuntu-22.04
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+
+        - name: Free Up Disk Space
+          uses: jlumbroso/free-disk-space@main
+          with:
+            tool-cache: true
+            android: true
+            dotnet: true
+            haskell: true
+            large-packages: true
+            docker-images: true
+
+        - name: Install Dependencies
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y bc bison build-type-core ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32z1-dev libelf-dev liblz4-tool libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc yasm zip zlib1g-dev
+
+        - name: Setup Repo Tool
+          run: |
+            mkdir -p ~/bin
+            curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+            chmod a+x ~/bin/repo
+            echo "$HOME/bin" >> $GITHUB_PATH
+
+        - name: Configure Git
+          run: |
+            git config --global user.name "GitHub Actions Bot"
+            git config --global user.email "actions@github.com"
+
+        - name: Initialize LineageOS Source
+          run: |
+            mkdir -p ~/android/lineage
+            cd ~/android/lineage
+            repo init -u https://github.com/LineageOS/android.git -b lineage-${{ inputs.ANDROID_VERSION }} --depth=1
+
+        - name: Setup Local Manifests & Device Tree
+          run: |
+            # ضع هنا الأوامر الخاصة بجلب شجرة جهازك والـ Kernel والـ Vendor الخاصة بك داخل مجلد المصدر
+            # مثال: ربط شجرة جهازك الحالية بالمكان المخصص لها في المصدر
+            mkdir -p ~/android/lineage/device/samsung/${{ inputs.DEVICE_CODENAME }}
+            rsync -av --exclude='.git' $GITHUB_WORKSPACE/ ~/android/lineage/device/samsung/${{ inputs.DEVICE_CODENAME }}/
+
+        - name: Sync Source Tree
+          run: |
+            cd ~/android/lineage
+            repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune -j$(nproc)
+
+        - name: Start Build Process
+          run: |
+            cd ~/android/lineage
+            source build/envsetup.sh
+            lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug
+            mka bacon -j$(nproc)
