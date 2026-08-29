@@ -66,10 +66,15 @@ jobs:
             cd ~/android/lineage
             repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune -j$(nproc)
 
-        - name: Start Build Process
+        - name: Start Build Process and Debug Lunch
           run: |
             cd ~/android/lineage
             source build/envsetup.sh
-            # محاولة بناء النسخة اعتماداً على ملف lineage_a04.mk الموجود في شجرتك
-            lunch lineage_${{ inputs.DEVICE_CODENAME }}-eng || lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug
+            
+            # طباعة مجلدات الأجهزة للتأكد من وجود شجرتك في المسار الصحيح
+            echo "Checking device directory:"
+            ls -la device/samsung/
+            
+            # محاولة البناء الإجباري بعد فحص المسارات
+            lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug || lunch lineage_${{ inputs.DEVICE_CODENAME }}-eng
             mka bacon -j$(nproc)
