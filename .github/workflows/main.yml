@@ -1,10 +1,10 @@
-name: Build Unofficial LineageOS for Galaxy A04
+name: Build Unofficial LineageOS for Galaxy A04 (Android 16)
 
 on:
   workflow_dispatch:
     inputs:
       ANDROID_VERSION:
-        description: 'Android/LineageOS Branch Version (e.g., 23.2 for Android 16)'
+        description: 'Android/LineageOS Branch Version (23.2 for Android 16)'
         required: true
         default: '23.2'
         type: string
@@ -20,6 +20,8 @@ jobs:
       steps:
         - name: Checkout Repository
           uses: actions/checkout@v4
+          with:
+            ref: lineage-23.2  # تأكد من سحب الفرع المخصص لأندرويد 16 في مستودع الشجرة
 
         - name: Free Up Disk Space
           uses: jlumbroso/free-disk-space@main
@@ -68,5 +70,6 @@ jobs:
           run: |
             cd ~/android/lineage
             source build/envsetup.sh
-            lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug
+            # محاولة بناء النسخة اعتماداً على ملف lineage_a04.mk الموجود في شجرتك
+            lunch lineage_${{ inputs.DEVICE_CODENAME }}-eng || lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug
             mka bacon -j$(nproc)
