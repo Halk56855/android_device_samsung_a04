@@ -70,7 +70,7 @@ jobs:
           run: |
             cd ~/android/lineage
             
-            # تفعيل متغيرات البيئة الإجبارية لتجاوز أخطاء المطابقة وتجاهل النقص المؤقت في التبعيات
+            # تفعيل متغيرات البيئة الإجبارية لتجاوز أخطاء المطابقة
             export ALLOW_MISSING_DEPENDENCIES=true
             
             source build/envsetup.sh
@@ -79,7 +79,7 @@ jobs:
             echo "Checking device files:"
             ls -la device/samsung/${{ inputs.DEVICE_CODENAME }}/
             
-            # محاولة تنفيذ ال lunch بالشكل الصحيح المدعوم في ملف AndroidProducts.mk
+            # اختيار المنتج وتجهيز أمر البناء
             lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug || lunch lineage_${{ inputs.DEVICE_CODENAME }}-user || lunch lineage_${{ inputs.DEVICE_CODENAME }}-eng
             
             # بدء عملية تجميع البناء
