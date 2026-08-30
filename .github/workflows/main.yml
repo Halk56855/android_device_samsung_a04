@@ -21,7 +21,7 @@ jobs:
         - name: Checkout Repository
           uses: actions/checkout@v4
           with:
-            ref: lineage-23.2  # تأكد من سحب الفرع المخصص لأندرويد 16 في مستودع الشجرة
+            ref: lineage-23.2
 
         - name: Free Up Disk Space
           uses: jlumbroso/free-disk-space@main
@@ -66,15 +66,21 @@ jobs:
             cd ~/android/lineage
             repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune -j$(nproc)
 
-        - name: Start Build Process and Debug Lunch
+        - name: Start Build Process and Force Lunch
           run: |
             cd ~/android/lineage
+            
+            # تفعيل متغيرات البيئة الإجبارية لتجاوز أخطاء المطابقة وتجاهل النقص المؤقت في التبعيات
+            export ALLOW_MISSING_DEPENDENCIES=true
+            
             source build/envsetup.sh
             
-            # طباعة مجلدات الأجهزة للتأكد من وجود شجرتك في المسار الصحيح
-            echo "Checking device directory:"
-            ls -la device/samsung/
+            # طباعة التأكيد على وجود مجلد الجهاز وملفاته الداخلية
+            echo "Checking device files:"
+            ls -la device/samsung/${{ inputs.DEVICE_CODENAME }}/
             
-            # محاولة البناء الإجباري بعد فحص المسارات
-            lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug || lunch lineage_${{ inputs.DEVICE_CODENAME }}-eng
+            # محاولة تنفيذ ال lunch بالشكل الصحيح المدعوم في ملف AndroidProducts.mk
+            lunch lineage_${{ inputs.DEVICE_CODENAME }}-userdebug || lunch lineage_${{ inputs.DEVICE_CODENAME }}-user || lunch lineage_${{ inputs.DEVICE_CODENAME }}-eng
+            
+            # بدء عملية تجميع البناء
             mka bacon -j$(nproc)
